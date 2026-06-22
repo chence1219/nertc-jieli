@@ -1,75 +1,139 @@
-# AI 实时互动 Example（杰理 AC791）
+# AI 实时互动 Example（杰理 AC7911）
 
-网易云信 · AI 实时互动演示 Demo，适用于杰理 AC791 系列开发板。
+网易云信 AI 实时互动演示 Demo，适用于杰理 AC7911 系列开发板。
 
 ## 介绍
 
-本 Demo 演示杰理智能硬件接入 AI 实时互动（语音通话）能力，并提供客户二次集成时的关键改动点与文件参考。
+本仓库展示 AC7911 开发板接入 NERTC AI 实时互动能力的最小可运行方案，当前版本已经包含：
+
+- 固定 WiFi STA 直连
+- OTA 配置查询
+- MQTT 外部注入
+- NERTC Lite Mode 进房与 AI 音频通道控制
+- 本地音频采集、Opus 上行、AI 下行播放
+- 基于 `on_ai_data` 的歌曲列表与在线音乐播放
+
+当前第三代主线代码统一收口在 `src3/`，`fw-AC79_AIoT_SDK/` 作为只读子模块使用。
+
+### 功能说明
+
+- AI 对话：支持设备侧接入 AI 实时语音对话链路。
+- MCP：支持通过 MCP tool 调用设备能力，例如音量调节。
+- 网易云音乐播放：支持基于 AI 返回的歌单进行在线音乐播放；该能力需要联系商务人员单独开通权限。
 
 ## 源码说明
 
 ### 源码结构
 
 ```text
-├── common
-│   ├── nertc_sdk                 // NERTC SDK（头文件 + 静态库）
-│   │   ├── include
-│   │   └── lib/ac7911/libnertc_sdk.a
-│   └── LLM/audio/audio_input.c   // 音频采集/播放适配实现（需替换 SDK 原文件）
-├── wifi_story_machine
-│   ├── app_main.c                // 应用入口
-│   ├── wifi_app_task.c           // WiFi 配置（SSID/PWD）
-│   ├── ai_sdk
-│   │   ├── nertc_protocol.h      // NERTC 默认参数（AppKey/DeviceID 等）
-│   │   └── nertc_protocol.c      // NERTC 协议封装实现
-│   └── board/wl82
-│       ├── AC791N_WIFI_STORY_MACHINE.cbp  // CodeBlocks 工程
-│       └── Makefile                        // 命令行构建入口
+├── board
+│   └── wl82
+│       ├── Makefile                  // 板级构建入口
+│       └── board_7911B.c             // 板级配置与按键映射
+├── fw-AC79_AIoT_SDK                  // 杰理 SDK 子模块（只读）
+├── src3
+│   ├── app_main.c                    // 应用入口
+│   ├── app_nertc_call.c              // 主状态机与按键/网络事件处理
+│   ├── wifi_app_task.c               // WiFi STA 启动与事件转发
+│   ├── nertc_ota.c                   // OTA HTTP 配置查询
+│   ├── nertc_mqtt_ext.c              // MQTT 外部注入层
+│   ├── nertc_protocol.c              // NERTC 协议封装
+│   ├── audio_input.c                 // 本地音频录音/播放主实现
+│   ├── audio_io.c                    // 音频流启停与上下行适配
+│   ├── music_player.c                // 在线音乐播放与歌单集成
+│   ├── app_config.h                  // 主配置
+│   ├── app_config_local.h.example    // 本地配置样例
+│   └── nertc_sdk
+│       ├── include                   // NERTC SDK 头文件
+│       └── lib/ac7911/libnertc_sdk.a // NERTC SDK 静态库
+├── .vscode
+│   ├── tasks.json                    // VSCode 构建任务
+│   └── winmk.bat                     // Windows 构建脚本
+├── Makefile                          // 顶层构建入口
 └── README.md
 ```
 
 ## 环境要求
 
-- 杰理 AC791 开发环境（工具链 + SDK），请先完成杰理官方环境搭建。
-- 已获取 AI 实时互动所需的云信能力开通信息（至少包含 `AppKey`）。
-- 可正常烧录并查看串口日志。
+- 已完成杰理 AC7911 开发环境搭建，包括工具链与 SDK 子模块。
+- 已具备可用的云信 `AppKey`，并完成目标设备的云端配置。
+- 可正常烧录固件并查看串口日志。
 
-## 客户接入步骤（推荐流程）
+## 配置步骤（推荐流程）
 
-1. Clone 杰理 AC791 SDK：
-   - `https://gitee.com/Jieli-Tech/fw-AC79_AIoT_SDK`
-2. 替换 Demo：
-   - 用本仓库的 `wifi_story_machine` 替换 SDK 内同名工程目录（通常是 `FW-AC79_AIoT_SDK/apps/wifi_story_machine`）。
-3. 添加 NERTC SDK：
-   - 将本仓库 `common/nertc_sdk` 拷贝到 SDK 的 `apps/common` 下（目标路径通常为 `FW-AC79_AIoT_SDK/apps/common/nertc_sdk`）。
-4. 替换音频文件：
-   - 用本仓库 `common/LLM/audio/audio_input.c` 覆盖 SDK 内同路径文件（通常为 `FW-AC79_AIoT_SDK/apps/common/LLM/audio/audio_input.c`）。
-5. 修改 WiFi：
-   - 编辑 `wifi_story_machine/wifi_app_task.c`（约第 307 行）：
-   - `#define INIT_SSID "你的WiFi名"`
-   - `#define INIT_PWD  "你的WiFi密码"`
-6. 填写 AppKey：
-   - 编辑 `wifi_story_machine/ai_sdk/nertc_protocol.h`（第 23 行）：
-   - `#define NERTC_DEFAULT_APP_KEY "你的AppKey"`
-7. 智能体平台配置：
-   - 在智能体平台创建并配置智能体，绑定设备 `device-id`（对应 `nertc_protocol.h` 中 `NERTC_DEFAULT_DEVICE_ID`）。
+1. 准备仓库与子模块。
+   - 拉取当前仓库。
+   - 初始化 `fw-AC79_AIoT_SDK/` 子模块。
+   - `git submodule update --init --recursive`
+2. 创建本地配置文件。
+   - 复制 `src3/app_config_local.h.example` 为 `src3/app_config_local.h`。
+   - 该文件已被 `.gitignore` 忽略，不会进入版本库。
+3. 填写 WiFi 信息。
+   - 编辑 `src3/app_config_local.h`：
+   - `APP_WIFI_SSID`
+   - `APP_WIFI_PASSWORD`
+4. 填写云端接入参数。
+   - 编辑 `src3/app_config.h`：
+   - `APP_KEY`
+   - `APP_DEFAULT_DEVICE_ID`
 
 ## 编译与运行
 
-编译 Demo 工程，参考杰理[官方文档](https://doc.zh-jieli.com/AC79/zh-cn/master/getting_started/project_download/download.html)。
+### VSCode
+
+执行任务：
+
+- `ac791n_nertc_demo`
+
+该任务会调用 `.vscode/winmk.bat` 执行完整构建，并继续执行板级 post-build 下载脚本。
+
+### 命令行
+
+```powershell
+.vscode\winmk.bat ac791n_nertc_demo
+```
+
+清理构建产物：
+
+```powershell
+.vscode\winmk.bat clean_ac791n_nertc_demo
+```
+
+说明：
+
+- 构建通过后如果出现 `Device Offline`，通常是下载阶段未连板，不代表编译失败。
 
 ## 关键配置清单
 
-- WiFi：`wifi_story_machine/wifi_app_task.c`
-- AppKey / DeviceID：`wifi_story_machine/ai_sdk/nertc_protocol.h`
-- NERTC 协议实现：`wifi_story_machine/ai_sdk/nertc_protocol.c`
-- 音频采集与播放：`common/LLM/audio/audio_input.c`
-- NERTC SDK 静态库：`common/nertc_sdk/lib/ac7911/libnertc_sdk.a`
+- WiFi 本地覆盖：`src3/app_config_local.h`
+- 主配置：`src3/app_config.h`
+- WiFi 启动与事件：`src3/wifi_app_task.c`
+- 应用状态机：`src3/app_nertc_call.c`
+- OTA 查询：`src3/nertc_ota.c`
+- MQTT 外部注入：`src3/nertc_mqtt_ext.c`
+- NERTC 协议层：`src3/nertc_protocol.c`
+- 本地音频采集/播放：`src3/audio_input.c`
+- 音频流上下行适配：`src3/audio_io.c`
+- 在线音乐播放：`src3/music_player.c`
+- NERTC SDK 静态库：`src3/nertc_sdk/lib/ac7911/libnertc_sdk.a`
+
+## 按键说明
+
+- `KEY_ENC`
+  - 在 `IDLE` 状态下开启 AI 对话
+  - 在 `LISTENING` 状态下关闭 AI 音频通道
+  - 在 `SPEAKING` 状态下触发打断
+- `KEY_POWER`
+  - 在播放音乐时停止音乐，并恢复 AI 音频通道
+
+当前板级按键映射定义位于：
+
+- `board/wl82/board_7911B.c`
 
 ## 注意事项
 
-- `NERTC_DEFAULT_APP_KEY` 为敏感配置，量产版本建议使用更安全的下发机制，不建议硬编码在固件中。
-- `NERTC_DEFAULT_DEVICE_ID` 建议使用设备唯一标识（如 MAC）以便平台侧精确管理。
-- 若你的 SDK 目录结构与本文不同，请以“同名模块替换 + 路径对齐”为准。
-
-运行 Demo：`K8` 按钮：开启/关闭/打断 AI 智能体。
+- `APP_KEY`、设备标识、真实 WiFi 凭证都属于敏感配置，公开仓库中不建议提交真实值。
+- 仓库默认不会跟踪 `src3/app_config_local.h`，请仅在本地保存该文件。
+- 如果 `APP_WIFI_SSID` 或 `APP_WIFI_PASSWORD` 为空，程序会跳过 WiFi 启动与重连。
+- `fw-AC79_AIoT_SDK/` 是 git 子模块，不应在当前项目需求下直接修改。
+- 当前仓库的设计目标是逐步收敛和精简，不建议再把第二代大状态机或额外业务模块整块搬回主线。

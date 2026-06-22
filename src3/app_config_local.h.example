@@ -1,0 +1,8 @@
+#ifndef APP_CONFIG_LOCAL_H
+#define APP_CONFIG_LOCAL_H
+
+#define APP_WIFI_SSID "your-ssid"
+#define APP_WIFI_PASSWORD "your-password"
+/* Optional: #define NERTC_OTA_HOST "webtest.netease.im" */
+
+#endif

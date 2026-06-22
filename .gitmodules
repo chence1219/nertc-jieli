@@ -1,0 +1,3 @@
+[submodule "fw-AC79_AIoT_SDK"]
+	path = fw-AC79_AIoT_SDK
+	url = https://gitee.com/Jieli-Tech/fw-AC79_AIoT_SDK.git
