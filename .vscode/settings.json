@@ -1,0 +1,27 @@
+{
+    "files.associations": {
+        "board_7911ba_cfg.h": "c",
+        "board_7911b_develop_cfg.h": "c",
+        "board_config.h": "c",
+        "app_config.h": "c",
+        "nertc_protocol.h": "c",
+        "nertc_application.h": "c",
+        "audio_io.h": "c",
+        "wifi_helper.h": "c",
+        "nertc_ota.h": "c",
+        "nertc_ota_config.h": "c",
+        "mcp_server.h": "c",
+        "music_player.h": "c",
+        "nertc_sdk.h": "c",
+        "nertc_sdk_define.h": "c",
+        "nertc_sdk_event.h": "c",
+        "nertc_sdk_error.h": "c",
+        "wifi_connect.h": "c",
+        "includes.h": "c",
+        "typedef.h": "c",
+        "cpu.h": "c",
+        "log.h": "c",
+        "printf.h": "c",
+        "stdbool.h": "c"
+    }
+}

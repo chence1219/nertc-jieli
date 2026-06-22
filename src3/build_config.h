@@ -1,0 +1,36 @@
+#ifndef BUILD_CONFIG_H
+#define BUILD_CONFIG_H
+
+#include "board_config.h"
+
+#define CONFIG_WIFI_ENABLE
+#define CONFIG_NET_ENABLE
+
+#define CONFIG_NERTC_ENABLE
+#define CONFIG_CONNECTION_TYPE_NERTC
+
+#define CONFIG_AUDIO_ENABLE
+
+#define CONFIG_RELEASE_ENABLE
+#define CONFIG_FREE_RTOS_ENABLE
+
+#define NETWORK_SSID_INFO_CNT                1
+
+#ifndef CONFIG_DEBUG_ENABLE
+#define CONFIG_DEBUG_ENABLE
+#endif
+#if !defined CONFIG_DEBUG_ENABLE || defined CONFIG_LIB_DEBUG_DISABLE
+#define LIB_DEBUG    0
+#else
+#define LIB_DEBUG    1
+#endif
+#define CONFIG_DEBUG_LIB(x)         (x & LIB_DEBUG)
+
+#define TCFG_LOWPOWER_LOWPOWER_SEL           0
+#define TCFG_LOWPOWER_BTOSC_DISABLE          0
+#define TCFG_LOWPOWER_VDDIOM_LEVEL           VDDIOM_VOL_32V
+#define TCFG_LOWPOWER_VDDIOW_LEVEL           VDDIOW_VOL_21V
+#define VDC14_VOL_SEL_LEVEL                  VDC14_VOL_SEL_140V
+#define SYSVDD_VOL_SEL_LEVEL                 SYSVDD_VOL_SEL_126V
+
+#endif

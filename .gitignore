@@ -1,0 +1,26 @@
+# Devflow
+.yunxin-devflow/
+yunxin-specs/
+docs/
+*.md
+!README.md
+src3/app_config_local.h
+
+# Build outputs
+output/
+board/wl82/objs/
+board/wl82/*.o
+board/wl82/*.d
+*.elf
+*.map
+*.bin
+*.log
+
+# IDE
+.idea/
+*.cbp
+*.workspace
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,3 @@
+SET SCRIPT_PATH=%~dp0%
+SET PATH=%SCRIPT_PATH%\..\fw-AC79_AIoT_SDK\tools\utils;%PATH%
+make "%1" -j %NUMBER_OF_PROCESSORS%
